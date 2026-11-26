@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import { conCatalogo } from '../data/negocio.ts';
+---
+<Base titulo="Página no encontrada">
+  <section class="pagina-cabeza container">
+    <h1>Este cuadro salió velado</h1>
+    <p class="lead">La página que buscas no existe o cambió de dirección.</p>
+    <div class="acciones"><a class="btn" href="/">Volver al inicio</a>{conCatalogo && <a class="btn-sec" href="/catalogo/">Ver catálogo</a>}</div>
+  </section>
+</Base>

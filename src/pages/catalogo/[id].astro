@@ -1,0 +1,82 @@
+---
+import { getCollection, getEntries, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Foto from '../../components/Foto.astro';
+import ProductoCard from '../../components/ProductoCard.astro';
+import TablaPrecios from '../../components/TablaPrecios.astro';
+import { negocio, linkWhatsapp, linkCorreo, precioCLP, precioTexto, ofertaProducto, conCatalogo, ancla } from '../../data/negocio.ts';
+import { servicios } from '../../data/servicios.ts';
+
+export async function getStaticPaths() {
+  if (!conCatalogo) return [];
+  return (await getCollection('productos')).map((producto) => ({ params: { id: producto.id }, props: { producto } }));
+}
+const { producto } = Astro.props;
+const p = producto.data;
+const { Content } = await render(producto);
+const junto = await getEntries(p.junto);
+const servicio = servicios.find((s) => s.id === p.tabla);
+const pedirJuntos = [p.nombre, ...junto.map((j) => j.data.nombre)].join(' + ');
+
+// schema.org: el producto (sin disponibilidad ni marca, que no sabemos) y las migas que ya se ven arriba
+const url = (ruta: string) => new URL(ruta, Astro.site).href;
+const oferta = ofertaProducto(p);
+const jsonLd = [
+  {
+    '@type': 'Product', name: p.nombre, description: p.resumen, category: p.categoria, url: url(Astro.url.pathname),
+    ...(p.imagen && { image: [p.imagen, ...p.mas].map((f) => url(f.src)) }),
+    ...(oferta && { offers: { ...oferta, seller: { '@id': url('/#local') } } }),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      ['Catálogo', '/catalogo/'],
+      [p.categoria, `/catalogo/#${ancla(p.categoria)}`],
+      [p.nombre, Astro.url.pathname],
+    ].map(([name, ruta], i) => ({ '@type': 'ListItem', position: i + 1, name, item: url(ruta) })),
+  },
+];
+---
+<Base titulo={p.nombre} descripcion={p.resumen} imagen={p.imagen?.src} jsonLd={jsonLd}>
+  <div class="container ficha">
+    <div class="ficha-fotos">
+      <Foto class="producto-foto" foto={p.imagen} titulo={p.nombre} sizes="(max-width: 48rem) 100vw, 55vw" eager />
+      {p.mas.map((f) => <Foto class="producto-foto" foto={f} titulo={p.nombre} sizes="(max-width: 48rem) 100vw, 55vw" />)}
+    </div>
+    <div class="ficha-texto">
+      <p class="meta"><a class="enlace" href="/catalogo/">Catálogo</a> / <a class="enlace" href={`/catalogo/#${ancla(p.categoria)}`}>{p.categoria}</a></p>
+      <h1>{p.nombre}</h1>
+      <p class="precio">{precioTexto(p)}</p>
+      {p.opciones.length > 0 && (
+        <ul class="opciones">
+          {p.opciones.map((o) => (
+            <li><span>{o.nombre}</span><strong>{precioCLP(o.precio)}</strong><a class="enlace" href={linkWhatsapp(`Hola, quiero pedir: ${p.nombre} (${o.nombre.toLowerCase()})`)}>Pedir</a></li>
+          ))}
+        </ul>
+      )}
+      {p.mayor && (
+        <p class="meta">¿Precio por mayor? <a class="enlace" href={linkWhatsapp(`Hola, quería consultar si hay precio por mayor para: ${p.nombre}`)}>Consulta disponibilidad por WhatsApp</a> o al correo <a class="enlace" href={linkCorreo(`Cotización por mayor: ${p.nombre}`)}>{negocio.email}</a>.</p>
+      )}
+      <div class="prosa" style="padding: 0"><Content /></div>
+      {servicio && <TablaPrecios s={servicio} />}
+      <div class="acciones">
+        <a class="btn" href={linkWhatsapp(`Hola, quiero pedir: ${p.nombre}`)}>Pedir por WhatsApp</a>
+      </div>
+      <div class="aviso">
+        <strong>Reserva por WhatsApp, retiro en el local</strong>
+        <p class="meta">Te confirmamos el total por WhatsApp. Para reservar se paga por transferencia; en el local, también con efectivo o tarjeta. Para cotizaciones, también al correo <a class="enlace" href={linkCorreo(`Cotización: ${p.nombre}`)}>{negocio.email}</a>. <a class="enlace" href="/como-comprar/">Cómo comprar</a></p>
+      </div>
+    </div>
+  </div>
+  {junto.length > 0 && (
+    <section class="seccion container">
+      <div class="cabeza-seccion">
+        <h2>Se lleva junto con</h2>
+        <a class="enlace" href={linkWhatsapp(`Hola, quiero pedir: ${pedirJuntos}`)}>Pedir todo junto por WhatsApp</a>
+      </div>
+      <ul class="productos">
+        {junto.map((j) => <ProductoCard producto={j} />)}
+      </ul>
+    </section>
+  )}
+</Base>

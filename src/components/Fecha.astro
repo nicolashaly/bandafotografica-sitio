@@ -1,0 +1,9 @@
+---
+// Fecha de una nota: a la vista como la imprimían las cámaras compactas ('26 10 28); la larga, para lectores de pantalla.
+interface Props { fecha: Date; class?: string }
+const { fecha, class: clase } = Astro.props;
+const dos = (n: number) => String(n).padStart(2, '0');
+const larga = fecha.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const camara = `'${dos(fecha.getUTCFullYear() % 100)} ${dos(fecha.getUTCMonth() + 1)} ${dos(fecha.getUTCDate())}`;
+---
+<time class={clase} datetime={fecha.toISOString().slice(0, 10)}><span class="visually-hidden">{larga}</span><span class="fecha-cam" aria-hidden="true">{camara}</span></time>

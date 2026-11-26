@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import { servicios } from '../data/servicios.ts';
+// Oculta (el _ hace que Astro no la publique) hasta tener la historia real: año de apertura, quién la fundó, anécdotas.
+// Para publicarla: renombrar a nosotros.astro y volver a poner el enlace en Header.astro. Sin datos inventados.
+---
+<Base titulo="Nosotros" descripcion="Banda Fotográfica, el laboratorio fotográfico de Av. Bernardo O’Higgins 997 en Talagante.">
+  <section class="pagina-cabeza container">
+    <h1>La tienda de fotos de Av. Bernardo O’Higgins 997</h1>
+    <p class="lead">Fotos para trámites, rollos, copias y marcos, atendidos en el mismo mesón del centro de Talagante.</p>
+  </section>
+  <section class="seccion container">
+    <div class="servicios-grid">
+      <div><h2>Cómo llegamos aquí</h2></div>
+      <div class="prosa" style="padding: 0">
+        <p><span class="fill" data-fill="historia">Historia del local por escribir: desde cuándo atiende, quién la fundó y cómo llegó a Av. Bernardo O’Higgins 997.</span></p>
+        <ul class="lista-simple">
+          {servicios.map((s) => <li><a class="enlace" href={`/servicios/#${s.id}`}>{s.nombre}</a></li>)}
+        </ul>
+        <p><a class="enlace" href="/visitanos/">Ven a conocernos</a></p>
+      </div>
+    </div>
+  </section>
+</Base>

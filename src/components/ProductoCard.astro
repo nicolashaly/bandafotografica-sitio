@@ -1,0 +1,16 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Foto from './Foto.astro';
+import { precioTexto } from '../data/negocio.ts';
+
+interface Props { producto: CollectionEntry<'productos'> }
+const { producto } = Astro.props;
+const p = producto.data;
+---
+<li class="producto">
+  <Foto class="producto-foto" foto={p.imagen} titulo={p.nombre} />
+  <span class="meta">{p.categoria}</span>
+  <h3><a href={`/catalogo/${producto.id}/`}>{p.nombre}</a></h3>
+  <p>{p.resumen}</p>
+  <span class="precio">{precioTexto(p)}</span>
+</li>

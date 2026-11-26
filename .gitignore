@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.astro/
+.hallmark/
+.env
+.env.production
+npm-debug.log*
+.DS_Store
+.idea/
+.obsidian/workspace*.json
+.obsidian/cache
+
+# Herramientas locales
+.agents/
+.claude/

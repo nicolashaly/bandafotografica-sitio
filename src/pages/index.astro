@@ -1,0 +1,115 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
+import Estado from '../components/Estado.astro';
+import ProductoCard from '../components/ProductoCard.astro';
+import Visita from '../components/Visita.astro';
+import Orden from '../components/Orden.astro';
+import Fecha from '../components/Fecha.astro';
+import { linkWhatsapp, conCatalogo } from '../data/negocio.ts';
+import { servicios } from '../data/servicios.ts';
+import { tira, enTira, sizes } from '../data/tira.ts';
+
+const productos = (await getCollection('productos')).sort((a, b) => a.data.orden - b.data.orden).slice(0, 4);
+const notas = (await getCollection('noticias')).sort((a, b) => +b.data.fecha - +a.data.fecha).slice(0, 3);
+const marcado = Math.max(0, servicios.findIndex((s) => s.foto)); // el lápiz graso marca el primer cuadro con foto
+---
+<Base>
+  <section class="hero container">
+    <h1>El laboratorio fotográfico de Talagante</h1>
+    <div class="hero-pie">
+      <div>
+        <p class="lead">Foto carnet, rollos, copias y marcos. En Av. Bernardo O’Higgins 997, en pleno centro.</p>
+        <p class="hero-estado"><Estado /></p>
+      </div>
+      <div class="acciones">
+        <a class="btn" href={linkWhatsapp()}>Escríbenos por WhatsApp</a>
+        {conCatalogo ? <a class="btn-sec" href="/catalogo/">Ver catálogo</a> : <a class="btn-sec" href="/servicios/">Ver servicios</a>}
+      </div>
+    </div>
+  </section>
+
+  <section class="tira" aria-label="Nuestros servicios">
+    <ol class="tira-cuadros">
+      {servicios.map((s, i) => (
+        <li>
+          <a class:list={['cuadro', { marcado: i === marcado }]} href={`/servicios/#${s.id}`}>
+            <span class="cuadro-borde" aria-hidden="true">{i + 1}</span>
+            <Foto class="cuadro-foto" foto={s.foto && enTira(s.foto)} titulo={s.nombre} sizes={sizes} eager />
+            <span class="cuadro-pie"><span class="cuadro-flecha" aria-hidden="true">▶{s.cuadro}</span><span class="cuadro-nombre">{s.nombre}</span></span>
+            {i === marcado && (
+              <svg class="lapiz" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path pathLength="1" d="M7 9 C30 3 70 2 95 6 C99 30 98 70 94 95 C65 99 30 98 5 94 C2 65 1 35 4 11 L13 3" />
+              </svg>
+            )}
+          </a>
+        </li>
+      ))}
+      {tira.map((f, i) => (
+        <li aria-hidden="true">
+          <div class="cuadro">
+            <span class="cuadro-borde">{servicios.length + i + 1}</span>
+            <Foto class="cuadro-foto" foto={enTira(f)} titulo="" sizes={sizes} />
+            <span class="cuadro-pie"><span class="cuadro-flecha">▶{servicios.length + i + 1}A</span></span>
+          </div>
+        </li>
+      ))}
+    </ol>
+    <div class="linterna" aria-hidden="true"></div>
+    <img class="rollo" src="/img/rollo.webp" alt="" width="300" height="820" decoding="async" />
+  </section>
+
+  <section class="seccion container">
+    <div class="cabeza-seccion">
+      <div>
+        <h2>Lo que pasa por el mesón</h2>
+        <p>Cada cuadro de la tira es uno de estos. Traes algo y te llevas otra cosa.</p>
+      </div>
+      <a class="enlace" href="/servicios/">Ver los servicios en detalle</a>
+    </div>
+    <div class="ordenes">
+      {servicios.map((s) => <Orden s={s} />)}
+    </div>
+  </section>
+
+  {conCatalogo && <section class="seccion container">
+    <div class="cabeza-seccion">
+      <h2>Rollos, cámaras y portarretratos</h2>
+      <a class="enlace" href="/catalogo/">Ver el catálogo completo</a>
+    </div>
+    <ul class="productos">
+      {productos.map((p) => <ProductoCard producto={p} />)}
+    </ul>
+  </section>}
+
+  <section class="seccion container">
+    <div class="cabeza-seccion">
+      <h2>Pides por WhatsApp y retiras aquí</h2>
+      <a class="enlace" href="/como-comprar/">Cómo comprar</a>
+    </div>
+    <ol class="pasos">
+      <li class="paso"><span class="paso-cubeta" aria-hidden="true">Cubeta 1 · revelador</span><strong>Escribe</strong><p>Cuéntanos qué necesitas y te confirmamos stock, precio y plazo.</p></li>
+      <li class="paso"><span class="paso-cubeta" aria-hidden="true">Cubeta 2 · detenedor</span><strong>Reserva</strong><p>Para apartarlo pagas por transferencia y nos mandas el comprobante por el mismo chat.</p></li>
+      <li class="paso"><span class="paso-cubeta" aria-hidden="true">Cubeta 3 · fijador</span><strong>Retira</strong><p>Lo retiras cuando te avisemos. Si compras directo en el local, pagas con efectivo, tarjeta o transferencia.</p></li>
+    </ol>
+  </section>
+
+  <section class="seccion container">
+    <div class="cabeza-seccion">
+      <h2>Noticias y notas del laboratorio</h2>
+      <a class="enlace" href="/noticias/">Todas las noticias</a>
+    </div>
+    <ul class="notas">
+      {notas.map((n) => (
+        <li class="nota">
+          <Fecha class="meta" fecha={n.data.fecha} />
+          <h3><a href={`/noticias/${n.id}/`}>{n.data.titulo}</a></h3>
+          <p>{n.data.resumen}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <Visita />
+</Base>

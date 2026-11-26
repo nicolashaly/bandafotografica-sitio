@@ -1,0 +1,61 @@
+---
+import Estado from './Estado.astro';
+import Logo from '../assets/logo-horizontal.svg'; // lo escribe marca/kit.py; "Banda" toma el color de tinta del tema
+import { conCatalogo } from '../data/negocio.ts';
+
+const links = [
+  ...(conCatalogo ? [{ href: '/catalogo/', texto: 'Catálogo' }] : []),
+  { href: '/servicios/', texto: 'Servicios' },
+  { href: '/noticias/', texto: 'Noticias' },
+  { href: '/visitanos/', texto: 'Visítanos' },
+];
+const actual = Astro.url.pathname;
+const temas = [
+  { id: '35mm', nombre: '35 mm color' },
+  { id: 'bn', nombre: 'Blanco y negro' },
+  { id: 'cine', nombre: 'Cine' },
+  { id: '110', nombre: '110' },
+];
+---
+<header class="cabecera">
+  <div class="container cabecera-in">
+    <a href="/" class="wordmark"><Logo role="img" aria-label="Banda Fotográfica, ir al inicio" /></a>
+    <nav id="menu" class="nav panel" popover aria-label="Principal">
+      <ul>
+        {links.map((l) => (
+          <li><a href={l.href} aria-current={actual.startsWith(l.href) ? 'page' : undefined}>{l.texto}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <Estado />
+    <button class="chip" popovertarget="temas" aria-haspopup="true">Tema</button>
+    <button class="chip menu-btn" popovertarget="menu" aria-haspopup="true">Menú</button>
+    <div id="temas" class="panel" popover>
+      <div class="temas-lista" role="group" aria-label="Tema del sitio">
+        <p class="meta">Elige un rollo para ver el sitio</p>
+        {temas.map((t) => (
+          <button class="tema-op" type="button" data-tema={t.id} aria-pressed={t.id === '35mm' ? 'true' : 'false'}>
+            <span class="muestra" data-m={t.id} aria-hidden="true"></span>{t.nombre}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const html = document.documentElement;
+  const botones = document.querySelectorAll<HTMLButtonElement>('[data-tema]');
+  const marcar = () => botones.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tema === (html.dataset.theme ?? '35mm'))));
+  marcar();
+  botones.forEach((b) => b.addEventListener('click', () => {
+    const t = b.dataset.tema!;
+    const aplicar = () => {
+      if (t === '35mm') delete html.dataset.theme; else html.dataset.theme = t;
+      try { localStorage.setItem('tema', t); } catch {}
+      marcar();
+    };
+    // Con animación, el cambio pasa como un rollo que avanza al cuadro siguiente (motion.css)
+    if (document.startViewTransition && html.classList.contains('anim')) document.startViewTransition(aplicar); else aplicar();
+  }));
+</script>

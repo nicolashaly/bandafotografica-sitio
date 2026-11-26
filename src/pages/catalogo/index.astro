@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProductoCard from '../../components/ProductoCard.astro';
+import { negocio, linkWhatsapp, linkCorreo, conCatalogo, ancla } from '../../data/negocio.ts';
+
+if (!conCatalogo) return Astro.redirect('/'); // sin catálogo publicado, quien llegue aquí va al inicio
+
+// Agrupados por categoría; los grupos y los productos siguen el `orden` de cada ficha
+const productos = (await getCollection('productos')).sort((a, b) => a.data.orden - b.data.orden);
+const grupos = Object.entries(Object.groupBy(productos, (p) => p.data.categoria));
+---
+<Base titulo="Catálogo: rollos, cámaras y marcos en Talagante" descripcion="Rollos, cámaras, impresión de fotos, marcos y pilas de Banda Fotográfica. Pide por WhatsApp y retira en Talagante.">
+  <section class="pagina-cabeza container">
+    <div class="titulo-nota"><h1>Catálogo</h1><span>(creciendo cada día)</span></div>
+    <p class="lead">Reservas por WhatsApp y retiras en el local. <a class="enlace" href="/como-comprar/">Cómo comprar</a></p>
+    <p class="meta">¿Compras en cantidad o necesitas una cotización? Escríbenos por <a class="enlace" href={linkWhatsapp('Hola, quería consultar si hay precio por mayor para:')}>WhatsApp</a> o al correo <a class="enlace" href={linkCorreo('Cotización')}>{negocio.email}</a>.</p>
+    <nav class="categorias" aria-label="Categorías">
+      {grupos.map(([c, lista]) => <a class="chip" href={`#${ancla(c)}`}>{c} <span class="meta">{lista!.length}</span></a>)}
+    </nav>
+  </section>
+  {grupos.map(([c, lista]) => (
+    <section class="seccion container grupo" id={ancla(c)}>
+      <h2>{c}</h2>
+      <ul class="productos">
+        {lista!.map((p) => <ProductoCard producto={p} />)}
+      </ul>
+    </section>
+  ))}
+</Base>

@@ -1,0 +1,20 @@
+---
+// Estado de atención en vivo. Sin JavaScript muestra el horario general.
+import { horarioCorto } from '../data/negocio.ts';
+interface Props { class?: string }
+---
+<a href="/visitanos/" class:list={['estado', Astro.props.class]} data-estado>{horarioCorto}</a>
+
+<script>
+  import { estado, ahoraEnChile } from '../data/horario.ts';
+  const pintar = () => {
+    const { fecha, min } = ahoraEnChile();
+    const e = estado(fecha, min);
+    document.querySelectorAll<HTMLElement>('[data-estado]').forEach((el) => {
+      el.textContent = e.texto;
+      el.dataset.abierto = String(e.abierto);
+    });
+  };
+  pintar();
+  setInterval(pintar, 60_000);
+</script>

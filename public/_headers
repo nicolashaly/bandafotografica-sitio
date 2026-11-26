@@ -1,0 +1,19 @@
+# Cabeceras de Cloudflare Pages (docs/produccion.md).
+# shortcut: CSP con 'unsafe-inline' en scripts y estilos (script del tema, scripts de Astro, style="object-position" y animaciones);
+# el sitio es estático y no recibe datos de visitantes. Pasar a hashes (security.csp de Astro) si algún día hay formularios o contenido de terceros.
+# cloudflareinsights: Web Analytics de Cloudflare, que se inyecta solo en bandafotografica.cl (no en la vista previa de tests).
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-src https://www.google.com; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Archivos con hash en el nombre: cambian de nombre si cambian
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Solo bandafotografica.cl se indexa; las direcciones de Pages (producción y vista previa de tests) no
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex

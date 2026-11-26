@@ -1,0 +1,12 @@
+---
+// Marco de foto: muestra la imagen o, si aún no existe, el nombre de lo que va ahí y un aviso de foto pendiente.
+interface Props { foto?: { src: string; alt: string; posicion?: string; srcset?: string }; titulo: string; class: string; sizes?: string; eager?: boolean }
+const { foto, titulo, class: clase, sizes = '(max-width: 60rem) 80vw, 25vw', eager = false } = Astro.props;
+---
+<div class={clase} data-slot>
+  {foto && (
+    <img src={foto.src} srcset={foto.srcset} alt={foto.alt} sizes={sizes} loading={eager ? 'eager' : 'lazy'} decoding="async"
+      style={foto.posicion ? `object-position: ${foto.posicion}` : undefined} />
+  )}
+  <span class="pendiente"><b>{titulo}</b>Foto pendiente</span>
+</div>

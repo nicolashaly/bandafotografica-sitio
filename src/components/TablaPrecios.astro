@@ -1,0 +1,33 @@
+---
+// Lista de precios de un servicio (servicios.ts): medidas, copia, precio sobre 100 y cuadro. Va en /servicios y en la ficha del catálogo.
+import { negocio, linkWhatsapp, linkCorreo, precioCLP } from '../data/negocio.ts';
+import type { servicios } from '../data/servicios.ts';
+
+interface Props { s: (typeof servicios)[number] }
+const { s } = Astro.props;
+const desdePapel = (s.precios ?? []).filter((p) => p.desdePapel);
+---
+{s.precios && (
+<div class="precios">
+  <div class="precios-tabla">
+  <table>
+    <caption>Precios de {s.nombre.toLowerCase()}</caption>
+    <thead><tr><th scope="col">Medida (cm)</th><th scope="col">Copia</th><th scope="col">Sobre 100 copias</th><th scope="col">Cuadro</th></tr></thead>
+    <tbody>
+      {s.precios.map((p) => (
+        <tr>
+          <th scope="row">{p.medida}</th>
+          <td>{precioCLP(p.copia)}</td>
+          <td>{p.sobre100 ? `${precioCLP(p.sobre100)} c/u` : '—'}</td>
+          <td>{p.cuadro ? p.cuadro.map(precioCLP).join(' a ') : '—'}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  </div>
+  {desdePapel.length > 0 && (
+    <p class="meta">Copia desde una foto en papel: {desdePapel.map((p) => `${p.medida} a ${precioCLP(p.desdePapel!)}`).join(' y ')}. Las demás medidas cuestan lo mismo.</p>
+  )}
+  <p class="meta">¿Necesitas más cantidad o una medida que no está? <a class="enlace" href={linkWhatsapp(`Hola, quería consultar precios de ${s.nombre.toLowerCase()} por cantidad`)}>Consulta otros precios por WhatsApp</a> o al correo <a class="enlace" href={linkCorreo(`Cotización: ${s.nombre}`)}>{negocio.email}</a>.</p>
+</div>
+)}

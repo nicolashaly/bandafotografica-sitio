@@ -1,0 +1,42 @@
+---
+import { negocio, linkWhatsapp, horarioCorto, conCatalogo } from '../data/negocio.ts';
+---
+<footer class="pie">
+  <div class="container">
+    <div class="pie-cols">
+      <div>
+        <h2>Banda Fotográfica, Talagante</h2>
+        <p>{negocio.direccion}<br />{negocio.comuna}</p>
+      </div>
+      <div>
+        <h3>Horario</h3>
+        <ul>
+          <li>{horarioCorto}</li>
+          <li>Colación de 14:00 a 15:00</li>
+          <li>Domingo y festivos, cerrado</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Contacto</h3>
+        <ul>
+          <li><a href={linkWhatsapp()}>WhatsApp {negocio.movil}</a></li>
+          <li><a href={`tel:${negocio.movil.replace(/\s/g, '')}`}>Llamar al {negocio.movil}</a></li>
+          <li><a href={`mailto:${negocio.email}`}>{negocio.email}</a></li>
+          <li><a href={negocio.instagram}>Instagram</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>El sitio</h3>
+        <ul>
+          {conCatalogo && <li><a href="/catalogo/">Catálogo</a></li>}
+          <li><a href="/como-comprar/">Cómo comprar</a></li>
+          <li><a href="/servicios/">Servicios</a></li>
+          <li><a href="/noticias/">Noticias</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pie-creditos">
+      <p>© {new Date().getFullYear()} Banda Fotográfica</p>
+    </div>
+  </div>
+</footer>

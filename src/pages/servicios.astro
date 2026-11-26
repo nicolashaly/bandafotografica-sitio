@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import Orden from '../components/Orden.astro';
+import { servicios } from '../data/servicios.ts';
+---
+<Base titulo="Foto carnet, revelado e impresión en Talagante" descripcion="Fotos para trámites, copias, restauración, revelado de rollos, impresión y marcos en Talagante.">
+  <section class="pagina-cabeza container">
+    <h1>Traes algo, te llevas otra cosa</h1>
+    <p class="lead">Cuatro servicios, todos en el mesón de Av. Bernardo O’Higgins 997. Si buscas algo que no está aquí, pregunta igual.</p>
+  </section>
+  <section class="seccion container">
+    <div class="ordenes">
+      {servicios.map((s) => <Orden s={s} detalle />)}
+    </div>
+  </section>
+</Base>

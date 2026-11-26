@@ -1,0 +1,57 @@
+---
+import Estado from './Estado.astro';
+import { negocio, semana, dias, linkWhatsapp } from '../data/negocio.ts';
+
+interface Props { detallado?: boolean }
+const { detallado = false } = Astro.props;
+const hora = (h: string) => h.replace(/^0/, '');
+// Resumen agrupado (lun a sáb / dom) o los siete días.
+const filas = detallado
+  ? [1, 2, 3, 4, 5, 6, 0].map((d) => ({ nombre: dias[d], dias: [d], tramos: semana[d] }))
+  : [
+      { nombre: 'Lunes a sábado', dias: [1, 2, 3, 4, 5, 6], tramos: semana[1] },
+      { nombre: 'Domingo y festivos', dias: [0], tramos: semana[0] },
+    ];
+---
+<section class="seccion container" id="visitanos">
+  <div class="visita">
+    <div class="visita-datos">
+      <div>
+        <h2>Av. Bernardo O’Higgins 997, Talagante</h2>
+        <p class="lead"><Estado /></p>
+      </div>
+      <table class="horario">
+        <caption class="visually-hidden">Horario de atención</caption>
+        <thead><tr><th scope="col">Día</th><th scope="col">Abre</th><th scope="col">Colación</th><th scope="col">Cierra</th></tr></thead>
+        <tbody>
+          {filas.map((f) => (
+            <tr data-dias={f.dias.join(',')}>
+              <th scope="row">{f.nombre}</th>
+              {f.tramos.length
+                ? <><td>{hora(f.tramos[0][0])}</td><td>{f.tramos.length > 1 ? `${hora(f.tramos[0][1])} a ${hora(f.tramos[1][0])}` : 'Sin colación'}</td><td>{hora(f.tramos.at(-1)![1])}</td></>
+                : <td colspan="3">Cerrado</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ul class="contactos">
+        <li><a class="enlace" href={linkWhatsapp()}>WhatsApp {negocio.movil}</a></li>
+        <li><a class="enlace" href={`tel:${negocio.movil.replace(/\s/g, '')}`}>Llamar al {negocio.movil}</a></li>
+        <li><a class="enlace" href={`mailto:${negocio.email}`}>{negocio.email}</a></li>
+        <li><a class="enlace" href={negocio.mapa}>Cómo llegar en Google Maps</a></li>
+      </ul>
+    </div>
+    <div class="mapa">
+      <iframe src={negocio.mapaEmbed} title={`Mapa: ${negocio.direccion}, ${negocio.ciudad}`} loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <span class="visor-enfoque" aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { ahoraEnChile } from '../data/horario.ts';
+  const { dia } = ahoraEnChile();
+  document.querySelectorAll<HTMLElement>('.horario tr[data-dias]').forEach((tr) => {
+    if (tr.dataset.dias!.split(',').map(Number).includes(dia)) tr.dataset.hoy = '';
+  });
+</script>

@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import Visita from '../components/Visita.astro';
+import { negocio, linkWhatsapp, linkCorreo } from '../data/negocio.ts';
+---
+<Base titulo="Cómo comprar por WhatsApp" descripcion="Reserva por WhatsApp y retira en Av. Bernardo O’Higgins 997, Talagante.">
+  <section class="pagina-cabeza container">
+    <h1>Cómo comprar</h1>
+    <p class="lead">Sin carrito ni registro: una conversación por WhatsApp y retiras en el local.</p>
+  </section>
+
+  <section class="seccion container">
+    <ol class="pasos">
+      <li class="paso">
+        <span class="paso-cubeta" aria-hidden="true">Cubeta 1 · revelador</span>
+        <strong>Escribe</strong>
+        <p>Dinos qué producto o servicio necesitas. Te confirmamos disponibilidad, precio total y cuándo estará listo.</p>
+        <p><a class="btn" href={linkWhatsapp('Hola, quiero hacer un pedido')}>Escribir por WhatsApp</a></p>
+        <p class="meta">¿Necesitas una cotización? También puedes escribir al correo <a class="enlace" href={linkCorreo()}>{negocio.email}</a>.</p>
+      </li>
+      <li class="paso">
+        <span class="paso-cubeta" aria-hidden="true">Cubeta 2 · detenedor</span>
+        <strong>Reserva</strong>
+        <p>Para dejarlo apartado pagas por transferencia y nos envías el comprobante por el mismo chat. Los datos de la cuenta te los mandamos al confirmar tu pedido.</p>
+      </li>
+      <li class="paso">
+        <span class="paso-cubeta" aria-hidden="true">Cubeta 3 · fijador</span>
+        <strong>Retira</strong>
+        <p>Te avisamos cuando esté listo y lo retiras en {negocio.direccion}, dentro del horario del local.</p>
+        <p class="aviso">¿Prefieres comprar directo en el local? Ahí pagas con efectivo, tarjeta o transferencia.</p>
+      </li>
+    </ol>
+  </section>
+
+  <Visita />
+</Base>

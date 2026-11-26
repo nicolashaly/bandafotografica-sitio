@@ -1,0 +1,95 @@
+/* Animación del sitio: revelado, rollo en marcha y cuarto oscuro combinados (docs/decisions/0005).
+   Todo depende de html.anim, que pone Base.astro solo si el visitante no pidió reducir movimiento;
+   html.primera marca la primera página de la sesión: sale la luz roja y la entrada espera a que se abra.
+   motion.ts parte los titulares en palabras y marca con .rv lo que entra y con .visto cuando aparece. */
+.cortina, .grano, .linterna { display: none; }
+@property --apertura { syntax: '<length-percentage>'; inherits: false; initial-value: 0%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .anim { --entrada: 0ms; --palabra: 100ms; }
+  .anim.primera { --entrada: 1300ms; --palabra: 1300ms; }
+
+  /* Bloques y fotos */
+  .rv:not(.visto) { opacity: 0; }
+  .rv.visto { animation: var(--rv-anim, subir) var(--rv-dur, 700ms) var(--ease-out) calc(var(--rv-base, 0ms) + var(--i, 0) * var(--rv-stagger, 80ms)) backwards; }
+  :is(.hero, .tira) .rv { --rv-base: var(--entrada); }
+  [data-slot].rv { --rv-anim: revelar-foto; --rv-dur: 2200ms; --rv-stagger: 160ms; }
+  .tira [data-slot].rv { --rv-anim: negativo; --rv-dur: 3000ms; --rv-stagger: 200ms; }
+  @keyframes subir { from { opacity: 0; transform: translateY(14px); } }
+  @keyframes revelar-foto { from { filter: blur(12px) sepia(0.9) brightness(0.3); } }
+  /* En negativo hasta los 0,7 s (24 % de 3 s) y después pasa lento a positivo */
+  @keyframes negativo { from, 24% { filter: invert(1) hue-rotate(180deg) contrast(1.3); animation-timing-function: ease-in-out; } }
+
+  /* Titulares palabra por palabra */
+  :is(.hero, .pagina-cabeza, .ficha-texto) h1 .w { display: inline-block; overflow: clip; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+  :is(.hero, .pagina-cabeza, .ficha-texto) h1 .w > span { display: inline-block; animation: palabra 900ms var(--ease-out) calc(var(--palabra) + var(--k) * 70ms) backwards; }
+  @keyframes palabra { from { transform: translateY(110%); } }
+
+  /* El lápiz graso se dibuja cuando la foto marcada ya está en positivo */
+  .cuadro.visto .lapiz path { animation: trazo 900ms var(--ease-in-out) calc(var(--entrada) + 2900ms) backwards; }
+  @keyframes trazo { from { stroke-dashoffset: 1; } }
+
+
+  /* Linterna sobre la tira, solo con mouse */
+  @media (hover: hover) and (pointer: fine) {
+    .anim .linterna {
+      display: block; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--dur-long) var(--ease-out);
+      background: radial-gradient(circle 240px at var(--x, 50%) var(--y, 50%), transparent 35%, var(--color-linterna));
+    }
+    .tira:hover .linterna { opacity: 1; }
+    .cuadro { transition: transform var(--dur-long) var(--ease-out); }
+    .cuadro:hover { transform: translateY(-6px) scale(1.02); }
+  }
+
+  /* Luz de seguridad al entrar */
+  .primera .cortina {
+    display: grid; place-items: center; position: fixed; inset: 0; z-index: calc(var(--z-toast) + 1); pointer-events: none;
+    background: var(--color-safelight); color: var(--color-safelight-ink); font-family: var(--font-edge); font-size: var(--text-xs);
+    mask: radial-gradient(circle at 50% 42%, transparent calc(var(--apertura) - 8%), currentColor var(--apertura));
+    animation: abrir 1200ms var(--ease-in-out) 700ms both;
+  }
+  .primera .cortina span { animation: luz 700ms ease-in-out infinite alternate; }
+  @keyframes abrir { to { --apertura: 120%; visibility: hidden; } }
+  @keyframes luz { from { opacity: 0.35; } }
+
+  /* Grano de película */
+  .anim .grano {
+    display: block; position: fixed; inset: -50%; z-index: var(--z-tooltip); pointer-events: none; opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: granular 0.9s steps(4) infinite;
+  }
+  @keyframes granular { 25% { transform: translate(-4%, 3%); } 50% { transform: translate(3%, -4%); } 75% { transform: translate(-2%, 5%); } }
+
+  /* Sello y talón: el número cae como un timbre y el talón entra después */
+  .orden.visto .orden-cuadro { animation: sello 650ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 250ms backwards; }
+  .orden.visto .talon { animation: talon-entra 700ms var(--ease-out) 450ms backwards; }
+  @keyframes sello { from { scale: 2.4; opacity: 0; rotate: -18deg; } 70% { scale: 0.94; opacity: 1; } }
+  @keyframes talon-entra { from { translate: 28px 0; opacity: 0; } }
+
+  /* Copias secándose: entran meciéndose hasta quedar en su giro (--giro, global.css) */
+  .producto { --rv-anim: columpio; --rv-dur: 1900ms; --rv-stagger: 140ms; }
+  @keyframes columpio { 0% { opacity: 0; rotate: calc(var(--giro) + 9deg); } 12% { opacity: 1; } 35% { rotate: calc(var(--giro) - 6deg); } 60% { rotate: calc(var(--giro) + 3deg); } 82% { rotate: calc(var(--giro) - 1deg); } }
+
+  /* Las tres cubetas: cada paso se revela cuando la línea le llega */
+  .cubetas-activas .paso strong { transition: opacity 0.8s var(--ease-out), filter 0.8s var(--ease-out); }
+  .cubetas-activas .paso:not(.lleno) strong { opacity: 0.3; filter: blur(3px); }
+
+  /* Fecha impresa: parpadea como el visor de la cámara al aparecer */
+  .nota.visto .fecha-cam { animation: led 1000ms steps(1) 200ms backwards; }
+  @keyframes led { 0% { opacity: 0; } 20% { opacity: 1; } 30% { opacity: 0.2; } 45% { opacity: 1; } 55% { opacity: 0.4; } 70% { opacity: 1; } }
+
+  /* Visor: el mapa se enfoca y el círculo se cierra */
+  .mapa.visto iframe { animation: enfocar 1600ms var(--ease-out) 200ms backwards; }
+  .mapa.visto .visor-enfoque { animation: anillo 1600ms var(--ease-out) 200ms backwards; }
+  @keyframes enfocar { from { filter: blur(10px); } }
+  @keyframes anillo { from { scale: 1.6; opacity: 0; } 40% { opacity: 1; } }
+
+  /* Rollo entre páginas: al navegar se usa la misma transición que el cambio de tema */
+  @view-transition { navigation: auto; }
+
+  /* Cambio de tema y de página: el rollo pasa al cuadro siguiente (Header.astro usa startViewTransition) */
+  ::view-transition-old(root) { animation: rollo-sale 650ms var(--ease-in-out) both; }
+  ::view-transition-new(root) { animation: rollo-entra 650ms var(--ease-in-out) both; box-shadow: -28px 0 0 var(--color-entrecuadro); }
+  @keyframes rollo-sale { to { transform: translateX(-100%); } }
+  @keyframes rollo-entra { from { transform: translateX(calc(100% + 28px)); } }
+}

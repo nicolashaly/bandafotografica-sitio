@@ -1,0 +1,34 @@
+---
+// Un servicio como orden de laboratorio: número de cuadro, qué es, y el talón con lo que traes y lo que te llevas.
+import Foto from './Foto.astro';
+import TablaPrecios from './TablaPrecios.astro';
+import { negocio, linkWhatsapp, linkCorreo } from '../data/negocio.ts';
+import type { servicios } from '../data/servicios.ts';
+
+interface Props { s: (typeof servicios)[number]; detalle?: boolean }
+const { s, detalle = false } = Astro.props;
+const Titulo = detalle ? 'h2' : 'h3';
+---
+<article class:list={['orden', { 'orden-detalle': detalle }]} id={detalle ? s.id : undefined}>
+  <span class="orden-cuadro" aria-hidden="true">{s.cuadro}</span>
+  <div class="orden-cuerpo">
+    <Titulo>{detalle ? s.nombre : <a href={`/servicios/#${s.id}`}>{s.nombre}</a>}</Titulo>
+    <p class="orden-linea">{s.linea}</p>
+    <ul class="orden-items">{s.items.map((it) => <li>{it}</li>)}</ul>
+    {detalle && (
+      <p><a class="btn-sec" href={linkWhatsapp(`Hola, quería consultar por ${s.nombre.toLowerCase()}`)}>Preguntar por WhatsApp</a></p>
+    )}
+    {detalle && !s.precios && ( /* con lista de precios, el correo va bajo la tabla */
+      <p class="meta">Cotizaciones también al correo <a class="enlace" href={linkCorreo(`Cotización: ${s.nombre}`)}>{negocio.email}</a>.</p>
+    )}
+  </div>
+  <dl class="talon">
+    <div><dt>Traes</dt><dd>{s.traes}</dd></div>
+    <div><dt>Te llevas</dt><dd>{s.llevas}</dd></div>
+  </dl>
+  {/* Hoja de contactos del servicio: la foto de la tira y las de ejemplo, en copias chicas */}
+  <ul class="orden-fotos" aria-label={`Fotos de ejemplo: ${s.nombre}`}>
+    {[s.foto, ...(s.mas ?? [])].map((f) => <li><Foto class="orden-foto" foto={f} titulo={s.nombre} sizes="(max-width: 60rem) 30vw, 14vw" /></li>)}
+  </ul>
+  {detalle && <TablaPrecios s={s} />}
+</article>

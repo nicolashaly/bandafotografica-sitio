@@ -1,0 +1,21 @@
+# Dependabot: un PR al mes por ecosistema, agrupado, contra `tests` para que pase por la vista previa antes de master.
+# Solo rige desde la rama por defecto (master). Los avisos de seguridad van siempre contra master: revisar la CI antes de aceptarlos.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: tests
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        patterns: ['*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: tests
+    schedule:
+      interval: monthly
+    groups:
+      acciones:
+        patterns: ['*']
